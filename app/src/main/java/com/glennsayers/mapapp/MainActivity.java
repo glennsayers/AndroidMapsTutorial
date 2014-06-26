@@ -1,6 +1,7 @@
 package com.glennsayers.mapapp;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,15 +14,50 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends Activity {
 
-    /** Local variables **/
-    GoogleMap googleMap;
+    /** Member variables **/
+    GoogleMap m_googleMap;
+    StreetViewPanorama m_StreetView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         createMapView();
-        addMarker();
+        createStreetView();
+
+        /**
+         * Set up the onClickListener that will pass the selected lat/long
+         * co-ordinates through to the Street View fragment for loading
+         */
+        m_googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+                /**
+                 * Hide the map view to expose the street view.
+                 */
+                Fragment mapView = getFragmentManager().findFragmentById(R.id.mapView);
+                getFragmentManager().beginTransaction().hide(mapView).commit();
+
+                /**
+                 * Ensure the street view has been initialise correctly and
+                 * pass it through the selected lat/long co-ordinates.
+                 */
+                if (m_StreetView != null) {
+                    m_StreetView.setPosition(latLng);
+                }
+            }
+        });
+    }
+
+    /**
+     * Initialises the street view member variable with the appropriate
+     * fragment from the FragmentManager
+     */
+    private void createStreetView() {
+        m_StreetView = ((StreetViewPanoramaFragment)
+                getFragmentManager().findFragmentById(R.id.streetView))
+                .getStreetViewPanorama();
     }
 
     /**
@@ -33,15 +69,15 @@ public class MainActivity extends Activity {
          * may be thrown when initialising the map
          */
         try {
-            if(null == googleMap){
-                googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+            if(null == m_googleMap){
+                m_googleMap = ((MapFragment) getFragmentManager().findFragmentById(
                         R.id.mapView)).getMap();
 
                 /**
                  * If the map is still null after attempted initialisation,
                  * show an error to the user
                  */
-                if(null == googleMap) {
+                if(null == m_googleMap) {
                     Toast.makeText(getApplicationContext(),
                             "Error creating map",Toast.LENGTH_SHORT).show();
                 }
@@ -57,8 +93,8 @@ public class MainActivity extends Activity {
     private void addMarker(){
 
         /** Make sure that the map has been initialised **/
-        if(null != googleMap){
-            googleMap.addMarker(new MarkerOptions()
+        if(null != m_googleMap){
+            m_googleMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(0, 0))
                                 .title("Marker")
                                 .draggable(true)
