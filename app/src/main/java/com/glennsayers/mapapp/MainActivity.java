@@ -34,16 +34,18 @@ public class MainActivity extends Activity {
             public void onMapClick(LatLng latLng) {
 
                 /**
-                 * Hide the map view to expose the street view.
-                 */
-                Fragment mapView = getFragmentManager().findFragmentById(R.id.mapView);
-                getFragmentManager().beginTransaction().hide(mapView).commit();
-
-                /**
                  * Ensure the street view has been initialise correctly and
                  * pass it through the selected lat/long co-ordinates.
                  */
                 if (m_StreetView != null) {
+
+                    /**
+                     * Hide the map view to expose the street view.
+                     */
+                    Fragment mapView = getFragmentManager().findFragmentById(R.id.mapView);
+                    getFragmentManager().beginTransaction().hide(mapView).commit();
+
+                    /** Passed the tapped location through to the Street View **/
                     m_StreetView.setPosition(latLng);
                 }
             }
